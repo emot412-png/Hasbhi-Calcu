@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hasbhi Calcu™ — Premium Arithmetic Experience</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --card: #1c1c28;
+      --border: #2a2a3d;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #e8e8f0;
+      --muted: #6b6b8a;
+      --red: #ff4d6d;
+      --green: #4ade80;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* Calculator */
+    .calc-wrapper {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .display {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      padding: 20px 24px 16px;
+    }
+    .display-input {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--muted);
+      min-height: 20px;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .display-result {
+      font-family: 'Space Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      text-align: right;
+      margin-top: 4px;
+      min-height: 44px;
+      letter-spacing: -1px;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .display-result.blurred {
+      filter: blur(8px);
+      user-select: none;
+      cursor: not-allowed;
+    }
+    .display-result.preview {
+      color: var(--gold-light);
+    }
+
+    /* Paywall overlay */
+    .paywall-overlay {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: -1px;
+      text-align: center;
+      position: relative;
+    }
+    .paywall-overlay.active { display: block; }
+
+    .paywall-overlay .lock-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .paywall-overlay h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+    .paywall-overlay p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .price-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      font-weight: 700;
+      font-size: 22px;
+      padding: 8px 24px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+    .price-tag span {
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .pay-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .pay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .pay-btn:active { transform: translateY(0); }
+
+    .dismiss-btn {
+      margin-top: 10px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .dismiss-btn:hover { color: var(--text); }
+
+    /* Buttons grid */
+    .buttons {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button.btn {
+      padding: 0;
+      height: 64px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--card);
+      color: var(--text);
+    }
+    button.btn:hover { background: #252535; border-color: #3a3a55; }
+    button.btn:active { transform: scale(0.95); }
+
+    button.btn.op {
+      background: #1e1e30;
+      color: var(--gold-light);
+      border-color: #2e2e45;
+      font-weight: 600;
+    }
+    button.btn.op:hover { background: #272740; }
+
+    button.btn.func {
+      background: #1a1a26;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    button.btn.equals {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      border: none;
+      font-weight: 700;
+      font-size: 24px;
+    }
+    button.btn.equals:hover { opacity: 0.9; }
+
+    button.btn.zero { grid-column: span 2; }
+
+    /* Testimonials */
+    .testimonials {
+      margin-top: 28px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .testimonials h4 {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .testi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .testi-author {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stars { color: var(--gold); font-size: 12px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--card);
+      border: 1px solid var(--gold);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      transition: transform 0.3s ease;
+      z-index: 999;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Footer */
+    .footer {
+      margin-top: 32px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+      line-height: 2;
+    }
+    .footer a { color: var(--gold); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="badge">✦ Premium Edition</div>
+    <h1>Hasbhi Calcu™</h1>
+    <p class="tagline">Arithmetic, but make it exclusive.</p>
+  </div>
+
+  <div class="calc-wrapper">
+    <div class="display">
+      <div class="display-input" id="expression">0</div>
+      <div class="display-result" id="result">0</div>
+    </div>
+
+    <div class="paywall-overlay" id="paywall">
+      <div class="lock-icon">🔐</div>
+      <h3>Hasil Tersembunyi</h3>
+      <p>Untuk melihat jawaban dari perhitungan eksklusif ini, silakan selesaikan pembayaran terlebih dahulu.</p>
+      <div class="price-tag">Rp 170.000 <span>/jawaban</span></div>
+      <button class="pay-btn" onclick="handlePayment()">💳 Bayar Sekarang</button>
+      <button class="dismiss-btn" onclick="dismissPaywall()">Tidak, saya lebih suka bingung</button>
+    </div>
+
+    <div class="buttons">
+      <button class="btn func" onclick="clearAll()">AC</button>
+      <button class="btn func" onclick="toggleSign()">+/-</button>
+      <button class="btn func" onclick="percentage()">%</button>
+      <button class="btn op" onclick="inputOp('/')">÷</button>
+
+      <button class="btn" onclick="inputNum('7')">7</button>
+      <button class="btn" onclick="inputNum('8')">8</button>
+      <button class="btn" onclick="inputNum('9')">9</button>
+      <button class="btn op" onclick="inputOp('*')">×</button>
+
+      <button class="btn" onclick="inputNum('4')">4</button>
+      <button class="btn" onclick="inputNum('5')">5</button>
+      <button class="btn" onclick="inputNum('6')">6</button>
+      <button class="btn op" onclick="inputOp('-')">−</button>
+
+      <button class="btn" onclick="inputNum('1')">1</button>
+      <button class="btn" onclick="inputNum('2')">2</button>
+      <button class="btn" onclick="inputNum('3')">3</button>
+      <button class="btn op" onclick="inputOp('+')">+</button>
+
+      <button class="btn zero" onclick="inputNum('0')">0</button>
+      <button class="btn" onclick="inputDot()">.</button>
+      <button class="btn equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <div class="testimonials">
+    <h4>Apa Kata Pelanggan Kami</h4>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      "Saya hitung 2+2, bayar 170rb, jawabannya 4. Worth it banget, dulu gak tau 2+2 berapa."
+      <div class="testi-author">— Budi S., Akuntan Senior</div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★★★</div>
+      "Fitur blur-nya canggih banget. Bikin penasaran. Langsung transfer."
+      <div class="testi-author">— Siti R., Ibu Rumah Tangga</div>
+    </div>
+    <div class="testi">
+      <div class="stars">★★★☆☆</div>
+      "Mahal sih, tapi exclusive. Sekarang kalo ditanya 7x8, gw bisa jawab dengan percaya diri."
+      <div class="testi-author">— Andi K., Mahasiswa</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2026 Hasbhi Calcu™ Inc. All Rights Reserved.<br>
+    <a href="#">Syarat & Ketentuan</a> · <a href="#">Kebijakan Privasi</a> · <a href="#">Hubungi Kami</a><br>
+    <span style="font-size:10px; opacity:0.5;">*Hasil perhitungan bersifat eksklusif dan tidak dapat direfund</span>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentInput = '';
+    let expression = '';
+    let justCalculated = false;
+    let actualResult = null;
+
+    function showToast(msg, duration = 3000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    function updateDisplay() {
+      const exprEl = document.getElementById('expression');
+      const resultEl = document.getElementById('result');
+      exprEl.textContent = expression || currentInput || '0';
+      resultEl.textContent = currentInput || '0';
+      resultEl.classList.remove('blurred', 'preview');
+    }
+
+    function inputNum(n) {
+      if (justCalculated) {
+        currentInput = '';
+        expression = '';
+        justCalculated = false;
+        document.getElementById('paywall').classList.remove('active');
+        document.getElementById('result').classList.remove('blurred', 'preview');
+      }
+      if (currentInput.length >= 12) return;
+      currentInput += n;
+      updateDisplay();
+    }
+
+    function inputDot() {
+      if (currentInput.includes('.')) return;
+      if (!currentInput) currentInput = '0';
+      currentInput += '.';
+      updateDisplay();
+    }
+
+    function inputOp(op) {
+      if (justCalculated) {
+        expression = currentInput + ' ' + opSymbol(op) + ' ';
+        currentInput = '';
+        justCalculated = false;
+        document.getElementById('paywall').classList.remove('active');
+        document.getElementById('result').classList.remove('blurred', 'preview');
+        document.getElementById('expression').textContent = expression;
+        return;
+      }
+      if (currentInput === '' && expression === '') return;
+      if (currentInput !== '') {
+        expression += currentInput + ' ' + opSymbol(op) + ' ';
+        currentInput = '';
+      } else {
+        // Replace last operator
+        expression = expression.trimEnd().replace(/[+\-×÷]$/, '').trimEnd() + ' ' + opSymbol(op) + ' ';
+      }
+      document.getElementById('expression').textContent = expression;
+      document.getElementById('result').textContent = '0';
+    }
+
+    function opSymbol(op) {
+      return { '+': '+', '-': '−', '*': '×', '/': '÷' }[op] || op;
+    }
+
+    function clearAll() {
+      currentInput = '';
+      expression = '';
+      justCalculated = false;
+      actualResult = null;
+      document.getElementById('paywall').classList.remove('active');
+      document.getElementById('result').classList.remove('blurred', 'preview');
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (!currentInput || currentInput === '0') return;
+      currentInput = currentInput.startsWith('-') ? currentInput.slice(1) : '-' + currentInput;
+      updateDisplay();
+    }
+
+    function percentage() {
+      if (!currentInput) return;
+      currentInput = String(parseFloat(currentInput) / 100);
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!currentInput && !expression) return;
+
+      let evalExpr = expression + currentInput;
+      if (!evalExpr) return;
+
+      // Convert display symbols to JS operators
+      evalExpr = evalExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+
+      try {
+        // Safe eval alternative
+        const result = Function('"use strict"; return (' + evalExpr + ')')();
+        if (!isFinite(result)) {
+          showToast('Hasilnya ∞ — ini gratis karena kami juga bingung 😅');
+          clearAll();
+          return;
+        }
+
+        actualResult = result;
+        const formatted = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(8)).toString();
+
+        // Show blurred result
+        const resultEl = document.getElementById('result');
+        resultEl.textContent = formatted;
+        resultEl.classList.add('blurred', 'preview');
+        document.getElementById('expression').textContent = evalExpr.replace(/\*/g,'×').replace(/\//g,'÷') + ' =';
+
+        justCalculated = true;
+        currentInput = formatted;
+
+        // Show paywall
+        document.getElementById('paywall').classList.add('active');
+
+      } catch(e) {
+        showToast('Error ngitung! Coba lagi 😬');
+        clearAll();
+      }
+    }
+
+    let paymentAttempts = 0;
+    const funnyMessages = [
+      'Transfer ke BCA 1234567890 a/n PT Hasbhi Calcu Premium Tbk ya kak 🏦',
+      'Mohon tunggu konfirmasi dari tim finance kami (1-3 hari kerja) 😇',
+      'Maaf kak, sistem sedang maintenance. Coba lagi besok ya! 🙏',
+      'Pembayaran berhasil! ...\n\nJK. Ini web iseng kok haha 😂',
+      'Psst... jawaban sebenarnya: ' + (actualResult !== null ? actualResult : '???') + '. Gratis kok 😄',
+    ];
+
+    function handlePayment() {
+      const msg = funnyMessages[paymentAttempts % funnyMessages.length];
+      paymentAttempts++;
+
+      if (paymentAttempts >= 4) {
+        // Reveal the answer for free
+        document.getElementById('result').classList.remove('blurred');
+        document.getElementById('paywall').classList.remove('active');
+        showToast('Oke oke gratis deh 😂 Itu hasilnya ↑', 4000);
+      } else {
+        showToast(msg, 4000);
+      }
+    }
+
+    function dismissPaywall() {
+      document.getElementById('paywall').classList.remove('active');
+      showToast('Oke, selamat bingung! 🫡', 2000);
+    }
+  </script>
+</body>
+</html>
